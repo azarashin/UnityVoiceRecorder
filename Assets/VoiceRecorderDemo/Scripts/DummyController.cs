@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +6,9 @@ using Voish.VoiceRecorder;
 
 public class DummyController : MonoBehaviour
 {
+    [SerializeField]
+    int _maxDuration = 30;
+
     [SerializeField]
     VoiceRecorderManager _voiceRecorderManager;
 
@@ -70,7 +73,7 @@ public class DummyController : MonoBehaviour
     private IEnumerator CoStartRecord()
     {
         _voiceRecorderManager.StopViewer();
-        yield return _voiceRecorderManager.CoStartRecord();
+        yield return _voiceRecorderManager.CoStartRecord(_maxDuration);
 
         _buttonSetup.interactable = false;
         _buttonStartRecord.interactable = false;

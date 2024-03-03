@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,9 +13,6 @@ namespace Voish.VoiceRecorder
 
         [SerializeField]
         bool _spectrumMode = false;
-
-        [SerializeField]
-        int _maxDuration = 30;
 
         int HeaderByteSize = 44;
         int BitsPerSample = 16;
@@ -60,12 +57,12 @@ namespace Voish.VoiceRecorder
             yield break; 
         }
 
-        public IEnumerator CoStartRecord()
+        public IEnumerator CoStartRecord(int maxDuration)
         {
             _isPlaying = true;
             Microphone.End(_targetDevice);
             _startTime = DateTime.Now; 
-            _micAudioSource.clip = Microphone.Start(_targetDevice, false, _maxDuration, SampleRate);
+            _micAudioSource.clip = Microphone.Start(_targetDevice, false, maxDuration, SampleRate);
             yield return CoMicStart();
 
             //_pitchViewer.Play(false);
@@ -123,7 +120,7 @@ namespace Voish.VoiceRecorder
                 yield break;
             }
 
-            //ƒ}ƒCƒNƒfƒoƒCƒX‚Ì€”õ‚ª‚Å‚«‚é‚Ü‚Å‘Ò‚Â
+            // ãƒã‚¤ã‚¯ãƒ‡ãƒã‚¤ã‚¹ã®æº–å‚™ãŒã§ãã‚‹ã¾ã§å¾…ã¤
             while (Microphone.GetPosition("") <= 0)
             {
                 yield return null;
@@ -203,7 +200,7 @@ namespace Voish.VoiceRecorder
                     currentMemoryStream.Write(bufData, 0, bufData.Length);
                 }
 
-                Debug.Log($"WAV ƒf[ƒ^ì¬Š®—¹");
+                Debug.Log($"WAV ãƒ‡ãƒ¼ã‚¿ä½œæˆå®Œäº†");
 
                 byte[] dataWav = currentMemoryStream.ToArray();
 
@@ -211,14 +208,14 @@ namespace Voish.VoiceRecorder
 
                 string pathSaveWav = GetFullPath(path);
 
-                // using ‚ğg‚Á‚Äƒƒ‚ƒŠŠJ•ú‚ğ©“®‚Ås‚¤
+                //  using ã‚’ä½¿ã£ã¦ãƒ¡ãƒ¢ãƒªé–‹æ”¾ã‚’è‡ªå‹•ã§è¡Œã†
                 using (FileStream currentFileStream = new FileStream(pathSaveWav, FileMode.Create))
                 {
                     System.Threading.Tasks.Task task = currentFileStream.WriteAsync(dataWav, 0, dataWav.Length); 
                     yield return new WaitUntil(() => task.IsCompleted);
                     //currentFileStream.Write(dataWav, 0, dataWav.Length);
 
-                    Debug.Log($"•Û‘¶Š®—¹ path : {pathSaveWav}");
+                    Debug.Log($"ä¿å­˜å®Œäº† path : {pathSaveWav}");
                 }
                 if (System.IO.File.Exists(pathSaveWav))
                 {
