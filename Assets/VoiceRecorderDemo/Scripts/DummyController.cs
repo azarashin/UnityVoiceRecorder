@@ -30,6 +30,8 @@ public class DummyController : MonoBehaviour
     [SerializeField]
     AudioSource _audioSourceToPlaySound;
 
+    private bool _isRecording = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -44,6 +46,13 @@ public class DummyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(_isRecording)
+        {
+            if(!_voiceRecorderManager.IsRecording)
+            {
+                OnFinishRecord(); 
+            }
+        }
         
     }
 
@@ -75,6 +84,8 @@ public class DummyController : MonoBehaviour
         _voiceRecorderManager.StopViewer();
         yield return _voiceRecorderManager.CoStartRecord(_maxDuration);
 
+        _isRecording = true; 
+
         _buttonSetup.interactable = false;
         _buttonStartRecord.interactable = false;
         _buttonFinishRecord.interactable = true;
@@ -93,6 +104,8 @@ public class DummyController : MonoBehaviour
         _voiceRecorderManager.StopViewer();
         yield return _voiceRecorderManager.CoFinishRecord("test.wav");
         _voiceRecorderManager.PlayViewer();
+
+        _isRecording = false; 
 
         _buttonSetup.interactable = false;
         _buttonStartRecord.interactable = false;

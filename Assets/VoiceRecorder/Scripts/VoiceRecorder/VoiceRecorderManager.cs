@@ -11,9 +11,6 @@ namespace Voish.VoiceRecorder
     public class VoiceRecorderManager : MonoBehaviour
     {
 
-        [SerializeField]
-        bool _spectrumMode = false;
-
         int HeaderByteSize = 44;
         int BitsPerSample = 16;
         int AudioFormat = 1;
@@ -26,11 +23,11 @@ namespace Voish.VoiceRecorder
         private float[] _nextSpectrum = new float[Resolution];
         private string _targetDevice;
 
-        private bool _isPlaying = false;
+        private bool _isRecording = false;
         private DateTime _startTime;
 
 
-
+        public bool IsRecording { get { return _isRecording; } } 
 
         private void Awake()
         {
@@ -43,9 +40,20 @@ namespace Voish.VoiceRecorder
             //Setup("https://395c6sel69.execute-api.ap-northeast-1.amazonaws.com/prod/prod/vocalcords1"); 
         }
 
+        private void FixedUpdate()
+        {
+            if(_isRecording)
+            {
+                if(!Microphone.IsRecording(_targetDevice))
+                {
+                    _isRecording = false; 
+                }
+            }
+        }
+
         public IEnumerator CoSetup()
         {
-            _isPlaying = false;
+            _isRecording = false;
 
             _targetDevice = Microphone.devices[0];
 
@@ -59,7 +67,7 @@ namespace Voish.VoiceRecorder
 
         public IEnumerator CoStartRecord(int maxDuration)
         {
-            _isPlaying = true;
+            _isRecording = true;
             Microphone.End(_targetDevice);
             _startTime = DateTime.Now; 
             _micAudioSource.clip = Microphone.Start(_targetDevice, false, maxDuration, SampleRate);
@@ -83,7 +91,7 @@ namespace Voish.VoiceRecorder
 
         public IEnumerator CoFinishRecord(string path)
         {
-            _isPlaying = false;
+            _isRecording = false;
             _micAudioSource.Stop();
             //_pitchViewer.Stop();
             Microphone.End(_targetDevice);
@@ -209,10 +217,12 @@ namespace Voish.VoiceRecorder
                 string pathSaveWav = GetFullPath(path);
 
                 //  using を使ってメモリ開放を自動で行う
-                using (FileStream currentFileStream = new FileStream(pathSaveWav, FileMode.Create))
+                using(FileStream currentFileStream = new FileStream(pathSaveWav, FileMode.Create))
                 {
-                    System.Threading.Tasks.Task task = currentFileStream.WriteAsync(dataWav, 0, dataWav.Length); 
+                    Debug.Log($"Start writing:  {pathSaveWav}");
+                    System.Threading.Tasks.Task task = currentFileStream.WriteAsync(dataWav, 0, dataWav.Length);
                     yield return new WaitUntil(() => task.IsCompleted);
+                    Debug.Log($"Completed writing:  {pathSaveWav}");
                     //currentFileStream.Write(dataWav, 0, dataWav.Length);
 
                     Debug.Log($"保存完了 path : {pathSaveWav}");
@@ -223,7 +233,7 @@ namespace Voish.VoiceRecorder
                 }
                 else
                 {
-                    Debug.LogError($"File not found?:  {pathSaveWav}");
+                    Debug.LogError($"Failed to save:  {pathSaveWav}");
                 }
                 yield break; 
             }
