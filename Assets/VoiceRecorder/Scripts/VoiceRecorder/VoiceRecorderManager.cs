@@ -217,7 +217,7 @@ namespace Voish.VoiceRecorder
                 string pathSaveWav = GetFullPath(path);
 
                 //  using を使ってメモリ開放を自動で行う
-                using(FileStream currentFileStream = new FileStream(pathSaveWav, FileMode.Create))
+                using(FileStream currentFileStream = new FileStream(pathSaveWav, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
                 {
                     Debug.Log($"Start writing:  {pathSaveWav}");
                     System.Threading.Tasks.Task task = currentFileStream.WriteAsync(dataWav, 0, dataWav.Length);
